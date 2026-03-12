@@ -39,6 +39,7 @@ jobs:
 
       - name: Terraform apply
         run: terraform -chdir=terraform apply -auto-approve
+        
 
       - name: Get VM Public IP
         id: tf_output
