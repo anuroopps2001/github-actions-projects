@@ -1,0 +1,65 @@
+name: Terraform-Ansible deployment
+
+
+## Trigger
+on:
+  push:
+    branches:
+        - main
+
+
+# Jobs
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+        run:
+          shell: bash
+ 
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: |
+            {
+             "clientID": "${{ secrets.AZURE_CLIENT_ID}}",
+             "clientSecret": "${{ secrets.AZURE_CLIENT_SECRET}}",
+             "subsciptionID": "${{ secrets.AZURE_SUBSCRIPTION_ID}}",
+             "tenantID": "${{ secrets.AZURE_TENANT_ID}}"
+            }
+
+      - name: Terraform init
+        run: terraform -chdir=terraform init
+
+      - name: Terraform apply
+        run: terraform -chdir=terraform apply -auto-approve
+
+
+      - name: Get VM Public IP
+        id: tf_output
+        run: |
+          VM_IP=$(terraform -chdir=terraform output -raw vm_public_ip)
+          echo "vm_ip=$VM_IP" >> $GITHUB_OUTPUT
+
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ steps.tf_output.outputs.vm_public_ip }} >> ~/.ssh/known_hosts
+
+      - name: Generate Ansible Inventory
+        run: |
+          mkdir -p ansible
+          echo "[prometheus]" > ansible/inventory.ini
+          echo "${{ steps.tf_output.outputs.vm_public_ip }} ansible_user=azureuser ansible_ssh_private_key_file=~/.ssh/id_rsa ansible_ssh_extra_args='-o StrictHostKeyChecking=no'" >> ansible/inventory.ini
+
+      - name: Run Ansible Playbook
+        run:
+          ansible-playbook -i ansible/inventory.ini ansible/playbook.yml
