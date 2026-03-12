@@ -32,6 +32,15 @@ jobs:
       - name: Terraform init
         run: terraform -chdir=terraform init
 
+      - name: Terraform Plan
+        run: terraform -chdir=terraform plan
+        env:
+          TF_LOG: DEBUG  # This will show you exactly where the API call fails
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
       - name: Terraform apply
         run: terraform -chdir=terraform apply -auto-approve
         
