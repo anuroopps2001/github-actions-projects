@@ -55,7 +55,7 @@ resource "azurerm_linux_virtual_machine" "linux_vm" {
   name                = "prometheus-vm"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-  size                = "Standard"
+  size                = "Standard_B2s"
 
   admin_username = "azureuser"
   network_interface_ids = [
