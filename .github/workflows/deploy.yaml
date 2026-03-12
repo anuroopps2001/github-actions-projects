@@ -30,7 +30,7 @@ jobs:
 
 
       - name: Terraform init
-        run: terraform -chdir=01/terraform init
+        run: terraform -chdir=01/terraform init -reconfigure
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
