@@ -34,6 +34,7 @@ jobs:
              "tenantID": "${{ secrets.AZURE_TENANT_ID}}"
             }
 
+            
       - name: Terraform init
         run: terraform -chdir=terraform init
 
