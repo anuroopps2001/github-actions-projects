@@ -36,7 +36,7 @@ jobs:
         run: terraform -chdir=terraform apply -auto-approve
         
 
-      - name: Get VM Public IP 
+      - name: Get VM Public IP
         id: tf_output
         run: |
           VM_IP=$(terraform -chdir=terraform output -raw vm_public_ip)
